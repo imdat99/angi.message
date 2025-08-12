@@ -26,7 +26,7 @@ enum ActivityType {
 
 // Core Messages
 message User {
-  string user_id = 1;
+  string id = 1;
   string email = 2;
   string name = 3;
   string profile_picture = 4; // URL
@@ -67,7 +67,7 @@ message PrivacySettings {
 }
 
 message Device {
-  string device_id = 1;
+  string id = 1;
   string device_name = 2;
   string device_type = 3;
   google.protobuf.Timestamp last_active = 4;
@@ -76,7 +76,7 @@ message Device {
 }
 
 message ActivityLog {
-  string log_id = 1;
+  string id = 1;
   google.protobuf.Timestamp timestamp = 2;
   ActivityType activity_type = 3;
   string ip_address = 4;
