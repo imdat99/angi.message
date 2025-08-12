@@ -1,0 +1,431 @@
+syntax = "proto3";
+
+package user_management;
+
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/empty.proto";
+
+option go_package = "./pb/angi_user;angi_userpb";
+
+// Enums
+enum Visibility {
+  VISIBILITY_UNSPECIFIED = 0;
+  PUBLIC = 1;
+  FRIENDS = 2;
+  PRIVATE = 3;
+}
+
+enum ActivityType {
+  ACTIVITY_TYPE_UNSPECIFIED = 0;
+  LOGIN = 1;
+  PASSWORD_CHANGE = 2;
+  SECURITY_SETTING_CHANGE = 3;
+  PROFILE_UPDATE = 4;
+  DEVICE_CONNECTION = 5;
+}
+
+// Core Messages
+message User {
+  string user_id = 1;
+  string email = 2;
+  string name = 3;
+  string profile_picture = 4; // URL
+  google.protobuf.Timestamp creation_date = 5;
+  google.protobuf.Timestamp last_login = 6;
+  bool is_active = 7;
+  
+  // Nested objects
+  SecuritySettings security_settings = 8;
+  PersonalInfo personal_info = 9;
+  PrivacySettings privacy_settings = 10;
+  repeated Device devices = 11;
+  repeated ActivityLog activity_logs = 12;
+}
+
+message SecuritySettings {
+  string password = 1; // Should be hashed in real implementation
+  bool two_factor_enabled = 2;
+  string recovery_email = 3;
+  string recovery_phone = 4;
+  repeated SecurityQuestion security_questions = 5;
+}
+
+message PersonalInfo {
+  string first_name = 1;
+  string last_name = 2;
+  google.protobuf.Timestamp date_of_birth = 3;
+  string gender = 4;
+  string phone_number = 5;
+  repeated string alternate_emails = 6;
+}
+
+message PrivacySettings {
+  Visibility profile_visibility = 1;
+  Visibility activity_visibility = 2;
+  bool data_sharing_with_third_parties = 3;
+  bool personalized_ads = 4;
+}
+
+message Device {
+  string device_id = 1;
+  string device_name = 2;
+  string device_type = 3;
+  google.protobuf.Timestamp last_active = 4;
+  string location = 5;
+  bool is_current_device = 6;
+}
+
+message ActivityLog {
+  string log_id = 1;
+  google.protobuf.Timestamp timestamp = 2;
+  ActivityType activity_type = 3;
+  string ip_address = 4;
+  string device_info = 5;
+  string location = 6;
+  string details = 7;
+}
+
+message SecurityQuestion {
+  string question_id = 1;
+  string question_text = 2;
+  string answer_hash = 3;
+}
+
+// Request/Response Messages
+message GetUserRequest {
+  string user_id = 1;
+}
+
+message GetUserResponse {
+  User user = 1;
+}
+
+message UpdateProfileRequest {
+  string user_id = 1;
+  PersonalInfo personal_info = 2;
+}
+
+message UpdateProfileResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+message ChangePasswordRequest {
+  string user_id = 1;
+  string old_password = 2;
+  string new_password = 3;
+}
+
+message ChangePasswordResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+message Enable2FARequest {
+  string user_id = 1;
+}
+
+message Enable2FAResponse {
+  bool success = 1;
+  string qr_code = 2; // Base64 encoded QR code for authenticator setup
+  string backup_codes = 3;
+}
+
+message GetSecuritySettingsRequest {
+  string user_id = 1;
+}
+
+message GetSecuritySettingsResponse {
+  SecuritySettings security_settings = 1;
+}
+
+message GetPersonalInfoRequest {
+  string user_id = 1;
+}
+
+message GetPersonalInfoResponse {
+  PersonalInfo personal_info = 1;
+}
+
+message GetPrivacySettingsRequest {
+  string user_id = 1;
+}
+
+message GetPrivacySettingsResponse {
+  PrivacySettings privacy_settings = 1;
+}
+
+message GetDevicesRequest {
+  string user_id = 1;
+}
+
+message GetDevicesResponse {
+  repeated Device devices = 1;
+  int32 total_count = 2;
+  int32 current_page = 3;
+  int32 page_size = 4;
+}
+
+message GetActivityLogsRequest {
+  string user_id = 1;
+  int32 page = 2;
+  int32 page_size = 3;
+}
+
+message GetActivityLogsResponse {
+  repeated ActivityLog activity_logs = 1;
+  int32 total_count = 2;
+}
+
+message UpdatePasswordRequest {
+  string user_id = 1;
+  string new_password = 2;
+}
+
+message UpdatePasswordResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+message EnableTwoFactorAuthRequest {
+  string user_id = 1;
+  string verification_code = 2;
+}
+
+message EnableTwoFactorAuthResponse {
+  bool success = 1;
+  repeated string backup_codes = 2;
+}
+
+message DisableTwoFactorAuthRequest {
+  string user_id = 1;
+  string verification_code = 2;
+}
+
+message DisableTwoFactorAuthResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+message AddRecoveryEmailRequest {
+  string user_id = 1;
+  string recovery_email = 2;
+}
+
+message AddRecoveryEmailResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+message VerifyRecoveryCodeRequest {
+  string user_id = 1;
+  string recovery_code = 2;
+}
+
+message VerifyRecoveryCodeResponse {
+  bool is_valid = 1;
+}
+
+message UpdateNameRequest {
+  string user_id = 1;
+  string first_name = 2;
+  string last_name = 3;
+}
+
+message UpdateNameResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+message UpdateContactInfoRequest {
+  string user_id = 1;
+  string phone_number = 2;
+  repeated string alternate_emails = 3;
+}
+
+message UpdateContactInfoResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+message UpdatePersonalDetailsRequest {
+  string user_id = 1;
+  PersonalInfo personal_info = 2;
+}
+
+message UpdatePersonalDetailsResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+message SetProfileVisibilityRequest {
+  string user_id = 1;
+  Visibility visibility = 2;
+}
+
+message SetProfileVisibilityResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+message SetActivityVisibilityRequest {
+  string user_id = 1;
+  Visibility visibility = 2;
+}
+
+message SetActivityVisibilityResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+message UpdateDataSharingPreferencesRequest {
+  string user_id = 1;
+  bool data_sharing_with_third_parties = 2;
+}
+
+message UpdateDataSharingPreferencesResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+message ManageAdPersonalizationRequest {
+  string user_id = 1;
+  bool personalized_ads = 2;
+}
+
+message ManageAdPersonalizationResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+message RemoveDeviceRequest {
+  string user_id = 1;
+  string device_id = 2;
+}
+
+message RemoveDeviceResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+message RenameDeviceRequest {
+  string user_id = 1;
+  string device_id = 2;
+  string new_name = 3;
+}
+
+message RenameDeviceResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+message SignOutDeviceRequest {
+  string user_id = 1;
+  string device_id = 2;
+}
+
+message SignOutDeviceResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+message UpdateSecurityQuestionRequest {
+  string user_id = 1;
+  string question_id = 2;
+  string question_text = 3;
+  string answer = 4;
+}
+
+message UpdateSecurityQuestionResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+message VerifyAnswerRequest {
+  string user_id = 1;
+  string question_id = 2;
+  string answer = 3;
+}
+
+message VerifyAnswerResponse {
+  bool is_correct = 1;
+}
+
+message GetUsersRequest {
+  int32 page = 1;
+  int32 page_size = 2;
+  optional string search_query = 3; // Optional search query for filtering users
+  optional string sort_by = 4; // Optional field to sort users
+  optional string sort_order = 5; // Optional field to specify sort order (asc/desc)
+  optional string filter_by = 6; // Optional field to filter users by specific criteria
+}
+message GetUsersResponse {
+  repeated User users = 1;
+  int32 total_count = 2;
+  int32 current_page = 3;
+  int32 page_size = 4;
+}
+message LoginUserRequest {
+  string email = 1;
+  string password = 2;
+}
+message LoginUserResponse {
+  User user = 1;
+  bool found = 2;
+}
+// Service Definitions
+service UserManagementService {
+  // User operations
+  rpc GetUser(GetUserRequest) returns (GetUserResponse);
+  rpc GetUsers(GetUsersRequest) returns (GetUsersResponse);
+  rpc UpdateProfile(UpdateProfileRequest) returns (UpdateProfileResponse);
+  rpc ChangePassword(ChangePasswordRequest) returns (ChangePasswordResponse);
+  rpc Enable2FA(Enable2FARequest) returns (Enable2FAResponse);
+}
+
+service SecurityService {
+  // Security Settings operations
+  rpc GetSecuritySettings(GetSecuritySettingsRequest) returns (GetSecuritySettingsResponse);
+  rpc UpdatePassword(UpdatePasswordRequest) returns (UpdatePasswordResponse);
+  rpc EnableTwoFactorAuth(EnableTwoFactorAuthRequest) returns (EnableTwoFactorAuthResponse);
+  rpc DisableTwoFactorAuth(DisableTwoFactorAuthRequest) returns (DisableTwoFactorAuthResponse);
+  rpc AddRecoveryEmail(AddRecoveryEmailRequest) returns (AddRecoveryEmailResponse);
+  rpc VerifyRecoveryCode(VerifyRecoveryCodeRequest) returns (VerifyRecoveryCodeResponse);
+  
+  // Security Questions operations
+  rpc UpdateSecurityQuestion(UpdateSecurityQuestionRequest) returns (UpdateSecurityQuestionResponse);
+  rpc VerifyAnswer(VerifyAnswerRequest) returns (VerifyAnswerResponse);
+
+  // Login and Activity operations
+  rpc LoginUser(LoginUserRequest) returns (LoginUserResponse);
+}
+
+service PersonalInfoService {
+  // Personal Info operations
+  rpc GetPersonalInfo(GetPersonalInfoRequest) returns (GetPersonalInfoResponse);
+  rpc UpdateName(UpdateNameRequest) returns (UpdateNameResponse);
+  rpc UpdateContactInfo(UpdateContactInfoRequest) returns (UpdateContactInfoResponse);
+  rpc UpdatePersonalDetails(UpdatePersonalDetailsRequest) returns (UpdatePersonalDetailsResponse);
+}
+
+service PrivacyService {
+  // Privacy Settings operations
+  rpc GetPrivacySettings(GetPrivacySettingsRequest) returns (GetPrivacySettingsResponse);
+  rpc SetProfileVisibility(SetProfileVisibilityRequest) returns (SetProfileVisibilityResponse);
+  rpc SetActivityVisibility(SetActivityVisibilityRequest) returns (SetActivityVisibilityResponse);
+  rpc UpdateDataSharingPreferences(UpdateDataSharingPreferencesRequest) returns (UpdateDataSharingPreferencesResponse);
+  rpc ManageAdPersonalization(ManageAdPersonalizationRequest) returns (ManageAdPersonalizationResponse);
+}
+
+service DeviceService {
+  // Device operations
+  rpc GetDevices(GetDevicesRequest) returns (GetDevicesResponse);
+  rpc RemoveDevice(RemoveDeviceRequest) returns (RemoveDeviceResponse);
+  rpc RenameDevice(RenameDeviceRequest) returns (RenameDeviceResponse);
+  rpc SignOutDevice(SignOutDeviceRequest) returns (SignOutDeviceResponse);
+}
+
+service ActivityService {
+  // Activity Log operations
+  rpc GetActivityLogs(GetActivityLogsRequest) returns (GetActivityLogsResponse);
+}
