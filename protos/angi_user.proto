@@ -5,7 +5,7 @@ package user_management;
 import "google/protobuf/timestamp.proto";
 import "google/protobuf/empty.proto";
 
-option go_package = "./pkg/angi_user;angi_userpb";
+option go_package = "./pkg/angi_userpb;angi_userpb";
 
 // Enums
 enum Visibility {
